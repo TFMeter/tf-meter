@@ -745,7 +745,6 @@ function createLink(startNode: nn.Node, endNode: nn.Node) {
 	startNode.outputs.push(link);
 	endNode.inputLinks.push(link);
 	drawNetwork(network);
-	totalCapacity = getTotalCapacity(network);
 	updateUI();
 }
 
@@ -1309,7 +1308,6 @@ function getTotalCapacity(network: nn.Node[][]): number {
 				let destIdx = link.dest.layer - 1;
 				propogatedInformation[destIdx] += 1;
 				for (let j = destIdx + 1; j < propogatedInformation.length; j++) {
-					console.log(j, aliveNodes[j], propogatedInformation[j]);
 					if (aliveNodes[j] > propogatedInformation[j]) {
 						propogatedInformation[j] += 1;
 					} else {
@@ -1341,10 +1339,12 @@ function getPropogatedInformation(network: nn.Node[][]): number[][] {
 			propogatedInformation.push(curLayerCapacity);
 		} else {
 			let uniqueInNodes: nn.Node[] = getUniqueInNodes(currentLayer, layerIdx === network.length - 1);
-			let minLayer = uniqueInNodes.length;
-			aliveNodes.push(minLayer);
-			for (let i = 1; i < layerIdx; i++) {
-				let uniqueInNodes: nn.Node[] = getUniqueInNodes(network[i], false);
+			let minLayer = (uniqueInNodes.length + 1) * currentLayer.filter((node) => {
+				return anyAliveOutputLinks(node) || layerIdx === network.length - 1;
+			}).length;
+			aliveNodes.push(uniqueInNodes.length);
+			for (let i = 2; i <= layerIdx; i++) {
+				let uniqueInNodes: nn.Node[] = getUniqueInNodes(network[i], layerIdx === network.length - 1);
 				let tempMinLayer = uniqueInNodes.length;
 				if (tempMinLayer < minLayer) {
 					minLayer = tempMinLayer;
@@ -1478,7 +1478,9 @@ function updateUI(firstStep = false) {
 	let bitLossTrain = lossTrain;
 	let bitGeneralization = generalization;
 
-	totalCapacity = getTotalCapacity(network);
+	if (!firstStep) {
+		totalCapacity = getTotalCapacity(network);
+	}
 	state.sugCapacity = getReqCapacity(trainData)[0];
 	state.maxCapacity = getReqCapacity(trainData)[1];
 
