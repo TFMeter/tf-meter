@@ -3,11 +3,6 @@
   "version": "2018.5.10",
   "description": "",
   "private": true,
-  "engines": {
-    "nodejs": ">=14.16.1",
-    "node": ">=14.16.1",
-    "npm": ">=6.14.12"
-  },
   "scripts": {
     "clean": "rimraf dist",
     "start": "npm run serve-watch",
